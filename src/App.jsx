@@ -430,7 +430,7 @@ const App = () => {
             <span className="text-xl font-bold text-white">M2CAMP</span>
           </div>
           <div className="text-sm">
-            © {new Date().getFullYear()} M2CAMP. All rights reserved. Miyzazaki, Japan.
+            © {new Date().getFullYear()} M2CAMP. All rights reserved.
           </div>
         </div>
       </footer>
