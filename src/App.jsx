@@ -52,9 +52,37 @@ const FadeInSection = ({ children, delay = 0 }) => {
   );
 };
 
+// ▼▼▼ 追加機能：ファビコンを動的に設定するフック ▼▼▼
+const useFavicon = () => {
+  useEffect(() => {
+    // ロゴ（Mountain）と同じSVGをデータURIとして作成
+    // 色は amber-500 (#f59e0b) に設定
+    const svgString = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m8 3 4 8 5-5 5 15H2L8 3z"/>
+      </svg>
+    `;
+    const encodedSvg = encodeURIComponent(svgString);
+    const dataUri = `data:image/svg+xml,${encodedSvg}`;
+
+    // 既存のファビコンリンクを探すか、新しく作成する
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
+    link.href = dataUri;
+  }, []);
+};
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
 const App = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // ファビコン設定を実行
+  useFavicon();
 
   // ▼▼▼ 設定箇所：問い合わせフォームURL ▼▼▼
   const CONTACT_FORM_URL = "https://forms.gle/Vfn1H5GsPNUCxStG7"; 
@@ -86,6 +114,34 @@ const App = () => {
     window.open(CONTACT_FORM_URL, '_blank');
     setIsMenuOpen(false);
   };
+
+  // ▼▼▼ 修正箇所：色のクラス定義を明示的に行うヘルパー関数 ▼▼▼
+  const getServiceStyles = (color) => {
+    const styles = {
+      blue: {
+        iconBox: "bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white",
+        checkIcon: "text-blue-500",
+        hoverBg: "group-hover:bg-blue-600"
+      },
+      purple: {
+        iconBox: "bg-purple-50 text-purple-600 group-hover:bg-purple-600 group-hover:text-white",
+        checkIcon: "text-purple-500",
+        hoverBg: "group-hover:bg-purple-600"
+      },
+      red: {
+        iconBox: "bg-red-50 text-red-600 group-hover:bg-red-600 group-hover:text-white",
+        checkIcon: "text-red-500",
+        hoverBg: "group-hover:bg-red-600"
+      },
+      green: {
+        iconBox: "bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white",
+        checkIcon: "text-green-500",
+        hoverBg: "group-hover:bg-green-600"
+      }
+    };
+    return styles[color] || styles.blue;
+  };
+  // ▲▲▲ 修正箇所ここまで ▲▲▲
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased selection:bg-amber-200 selection:text-amber-900">
@@ -284,7 +340,6 @@ const App = () => {
               <FadeInSection key={i} delay={i * 200}>
                 <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 relative group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                   
-                  {/* アイコン部分を修正: AlertCircleを削除し、各項目のiconを表示 */}
                   <div className="w-14 h-14 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-amber-500 mb-6 relative z-10">
                     <item.icon className="w-7 h-7" />
                   </div>
@@ -391,7 +446,6 @@ const App = () => {
                 icon: Briefcase, 
                 title: "経営戦略・事業計画", 
                 desc: "社長の頭の中にある構想を、銀行や投資家が納得するレベルの「事業計画書」に落とし込みます。",
-                // ▼▼▼ 変更箇所：補助金・融資サポート → 収益シミュレーション作成 ▼▼▼
                 tags: ["中期経営計画策定", "新規事業立ち上げ支援", "収益シミュレーション作成"],
                 color: "blue"
               },
@@ -416,27 +470,36 @@ const App = () => {
                 tags: ["採用代行・制度設計", "オフィス移転PM", "マネージャー育成"],
                 color: "green"
               }
-            ].map((service, index) => (
-              <FadeInSection key={index} delay={index * 150}>
-                <div className="bg-white p-8 rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-100 hover:shadow-xl hover:border-slate-200 transition-all duration-300 group h-full flex flex-col">
-                  <div className={`w-14 h-14 bg-${service.color}-50 rounded-2xl flex items-center justify-center text-${service.color}-600 mb-6 group-hover:bg-${service.color}-600 group-hover:text-white transition-all duration-300 transform group-hover:rotate-6`}>
-                    <service.icon className="w-7 h-7" />
+            ].map((service, index) => {
+              // ▼▼▼ 修正箇所：スタイルの取得 ▼▼▼
+              const styles = getServiceStyles(service.color);
+              
+              return (
+                <FadeInSection key={index} delay={index * 150}>
+                  <div className="bg-white p-8 rounded-2xl shadow-lg shadow-slate-200/40 border border-slate-100 hover:shadow-xl hover:border-slate-200 transition-all duration-300 group h-full flex flex-col">
+                    {/* ▼▼▼ 修正箇所：動的クラス生成をやめ、定義済みのスタイルを適用 ▼▼▼ */}
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-all duration-300 transform group-hover:rotate-6 ${styles.iconBox}`}>
+                      <service.icon className="w-7 h-7" />
+                    </div>
+                    {/* ▲▲▲ 修正箇所ここまで ▲▲▲ */}
+                    
+                    <h3 className="text-xl font-bold text-slate-900 mb-4">{service.title}</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed mb-8 flex-grow">
+                      {service.desc}
+                    </p>
+                    <div className="space-y-3 pt-6 border-t border-slate-100">
+                      {service.tags.map((tag, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm text-slate-600 font-medium">
+                          {/* チェックアイコンの色も同様に修正 */}
+                          <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${styles.checkIcon}`} /> 
+                          {tag}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-4">{service.title}</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed mb-8 flex-grow">
-                    {service.desc}
-                  </p>
-                  <div className="space-y-3 pt-6 border-t border-slate-100">
-                    {service.tags.map((tag, i) => (
-                      <div key={i} className="flex items-center gap-2 text-sm text-slate-600 font-medium">
-                        <CheckCircle2 className={`w-4 h-4 text-${service.color}-500 flex-shrink-0`} /> 
-                        {tag}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </FadeInSection>
-            ))}
+                </FadeInSection>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -453,7 +516,6 @@ const App = () => {
                 <div className="inline-block text-amber-500 font-bold tracking-wider text-sm uppercase mb-4 pl-1">
                   Representative
                 </div>
-                {/* ▼▼▼ 修正箇所：プロフィール見出し ▼▼▼ */}
                 <h2 className="text-4xl font-bold mb-8 leading-tight">
                   上場企業<br/>経営経験者が<br />
                   あなたの<br/>
@@ -481,7 +543,6 @@ const App = () => {
 
                   {[
                     { color: "blue", title: "国内大手広告代理店", text: "大手クライアントのWebマーケティングを統括、ブランディングから獲得広告の運用、SNS運用まで幅広く対応。" },
-                    // ▼▼▼ 修正箇所：事業規模の数値修正 ▼▼▼
                     { color: "amber", title: "IT企業 新規事業責任者", text: "新規事業立ち上げを含む事業責任者を歴任し、事業の0→1、1→10どちらも経験。数億規模の事業管理に従事。" },
                     { color: "green", title: "宮崎にて0から50名規模の会社立ち上げ", text: "経営者として、オフィス設計から採用・制度構築まで一気通貫で担当。未経験者中心の現地採用で組織化・黒字化に成功。" }
                   ].map((career, i) => (
