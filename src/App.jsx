@@ -57,7 +57,7 @@ const App = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // ▼▼▼ 設定箇所：問い合わせフォームURL ▼▼▼
-  const CONTACT_FORM_URL = "https://forms.gle/QSXyYwGy5pcMzrvH7"; 
+  const CONTACT_FORM_URL = "https://forms.gle/Vfn1H5GsPNUCxStG7"; 
   // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
   useEffect(() => {
